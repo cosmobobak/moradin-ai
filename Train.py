@@ -1,6 +1,6 @@
 from NetMaker import BATCH_SIZE, NetMaker
 from State import State
-from Serializer import serialize_state
+from Serializer import vec_state
 from random import choices
 import os
 import tensorflow as tf
@@ -45,17 +45,16 @@ def sample_probabilities(p, game: State):
     return move
 
 def run_training_match(model):
-    stateMoveDict = dict()
-    stateValueDict = dict()
+    tracker = dict()
     game = State()
     while game.is_game_over() == False:
-        probabilities = model(serialize_state(game))
-        stateMoveDict[serialize_state(game)] = probabilities
+        probabilities, value = model(vec_state(game))
+        tracker[vec_state(game)] = (probabilities, value)
         move = sample_probabilities(probabilities, game)
         game.play(move)
-    probabilities = model(serialize_state(game))
-    stateMoveDict[serialize_state(game)] = probabilities
-    return stateMoveDict
+    probabilities, value = model(vec_state(game))
+    tracker[vec_state(game)] = (probabilities, value)
+    return tracker
 
 if __name__ == "__main__":
     model = NetMaker()()
